@@ -42,6 +42,9 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MEN
 	if (isFullUI)
 		addEntry("CONFIGURE INPUT", 0x777777FF, true, [this] { openConfigInput(); });
 
+	if (isFullUI)
+		addEntry("FRIENDS LIST", 0x777777FF, true, [this] {openFriendsList(); });
+
 	addEntry("QUIT", 0x777777FF, true, [this] {openQuitMenu(); });
 
 	addChild(&mMenu);
@@ -462,6 +465,27 @@ void GuiMenu::openConfigInput()
 	}, "NO", nullptr)
 	);
 
+}
+
+void GuiMenu::openFriendsList(){
+	auto s = new GuiSettings(mWindow, "FRIENDS LIST");
+
+	Window* window = mWindow;
+	ComponentListRow row;
+	//Add new friend
+	/*if (UIModeController::getInstance()->isUIModeFull()){
+		row.makeAcceptInputHandler([window]) {
+			window->pushGui(new GuiMsgBox(window, "ENTER FRIENDS NAME"));
+		}
+		row.addElement(std::make_shared<TextComponent>(window, "ADD FRIENDS", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+		s->addRow(row);
+	}*/
+	row.addElement(std::make_shared<TextComponent>(window, "BeastBalla", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	s->addRow(row);
+	row.addElement(std::make_shared<TextComponent>(window, "EconomicRug", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	s->addRow(row);
+	//add row for each friend
+	mWindow.pushGui(s);
 }
 
 void GuiMenu::openQuitMenu()
