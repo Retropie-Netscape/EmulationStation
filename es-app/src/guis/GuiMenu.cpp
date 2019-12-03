@@ -21,7 +21,6 @@
 #include "platform.h"
 #include "userbase.txt"
 #include <Python.h>
-#include "Retropie-Netscape/netspace-client/ConnectToUser.py"
 
 GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MENU"), mVersion(window)
 {
@@ -484,7 +483,7 @@ void GuiMenu::openFriendsList(){
 	row.makeAcceptInputHandler([window]) {
 		window->pushGui(new GuiMsgBox(window, "ENTER FRIENDS NAME"));
 	}
-
+d
 	s->addRow(row);
 	*/
 	row.addElement(std::make_shared<TextComponent>(window, "BeastBalla", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
