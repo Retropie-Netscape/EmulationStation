@@ -18,6 +18,7 @@
 #include "VolumeControl.h"
 #include <SDL_events.h>
 #include <algorithm>
+#include <fstream>
 #include "platform.h"
 #include "userbase.txt"
 #include <Python.h>
@@ -483,7 +484,6 @@ void GuiMenu::openFriendsList(){
 	row.makeAcceptInputHandler([window]) {
 		window->pushGui(new GuiMsgBox(window, "ENTER FRIENDS NAME"));
 	}
-d
 	s->addRow(row);
 	*/
 	row.addElement(std::make_shared<TextComponent>(window, "BeastBalla", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
@@ -503,14 +503,13 @@ d
 		s->addRow(row);
 		getline(inf, tmp_username);
 	}
-
 	//add row to Update friends
 	row.addElement(std::make_shared<TextComponent>(window, "UPDATE FRIENDS LIST", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 	row.makeAcceptInputHandler([window] {
-			window->pushGui(new GuiMsgBox(window, "FRIENDS LIST UPDATED", 
-				[] {
-					Scripting::fireEvent("updated");
-				}));
+		window->pushGui(new GuiMsgBox(window, "FRIENDS LIST UPDATED", 
+			[] {
+				Scripting::fireEvent("updated");
+			}));
 	});
 	s->addRow(row);
 	//add row to update Connection
@@ -518,6 +517,7 @@ d
 	s->addRow(row);
 	//Push GUI to window
 	mWindow.pushGui(s);
+	//close filestream
 	inf.close();
 }
 
