@@ -19,6 +19,9 @@
 #include <SDL_events.h>
 #include <algorithm>
 #include "platform.h"
+#include "userbase.txt"
+#include <Python.h>
+#include "Retropie-Netscape/netspace-client/ConnectToUser.py"
 
 GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MENU"), mVersion(window)
 {
@@ -470,22 +473,53 @@ void GuiMenu::openConfigInput()
 void GuiMenu::openFriendsList(){
 	auto s = new GuiSettings(mWindow, "FRIENDS LIST");
 
+	ifstream inf;
+	inf.open("userbase.txt");
+	string tmp_username;
 	Window* window = mWindow;
 	ComponentListRow row;
 	//Add new friend
-	/*if (UIModeController::getInstance()->isUIModeFull()){
-		row.makeAcceptInputHandler([window]) {
-			window->pushGui(new GuiMsgBox(window, "ENTER FRIENDS NAME"));
-		}
-		row.addElement(std::make_shared<TextComponent>(window, "ADD FRIENDS", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
-		s->addRow(row);
-	}*/
+	/*
+	row.addElement(std::make_shared<TextComponent>(window, "ADD FRIENDS", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	row.makeAcceptInputHandler([window]) {
+		window->pushGui(new GuiMsgBox(window, "ENTER FRIENDS NAME"));
+	}
+
+	s->addRow(row);
+	*/
 	row.addElement(std::make_shared<TextComponent>(window, "BeastBalla", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 	s->addRow(row);
 	row.addElement(std::make_shared<TextComponent>(window, "EconomicRug", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 	s->addRow(row);
 	//add row for each friend
+	getline(inf, tmp_username);
+	while(!inf.eof() ){
+		row.addElement(std::make_shared<TextComponent>(window, tmp_username, Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+		row.makeAcceptInputHandler([window] {
+			window->pushGui(new GuiMsgBox(window, "CONNECT TO FRIEND?", "YES",
+				[] {
+				Scripting::fireEvent("connect");
+			}, "NO", nullptr));
+		});
+		s->addRow(row);
+		getline(inf, tmp_username);
+	}
+
+	//add row to Update friends
+	row.addElement(std::make_shared<TextComponent>(window, "UPDATE FRIENDS LIST", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	row.makeAcceptInputHandler([window] {
+			window->pushGui(new GuiMsgBox(window, "FRIENDS LIST UPDATED", 
+				[] {
+					Scripting::fireEvent("updated");
+				}));
+	});
+	s->addRow(row);
+	//add row to update Connection
+	row.addElement(std::make_shared<TextComponent>(window, "UPDATE MY CONNECTION DETAILS", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	s->addRow(row);
+	//Push GUI to window
 	mWindow.pushGui(s);
+	inf.close();
 }
 
 void GuiMenu::openQuitMenu()
