@@ -492,33 +492,42 @@ void GuiMenu::openFriendsList(){
 	}
 	s->addRow(row);
 	*/
-	row.addElement(std::make_shared<TextComponent>(window, "BeastBalla", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	/*row.addElement(std::make_shared<TextComponent>(window, "BeastBalla", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 	s->addRow(row);
 	row.addElement(std::make_shared<TextComponent>(window, "EconomicRug", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
-	s->addRow(row);
+	s->addRow(row);*/
 	//add row for each friend
 	pFile = PyUnicode_DecodeFSDefault("ConnectToUser");
 	pModule = PyImport_Import(pFile);
-	pFunc = PyObject_GetAttrString(pModule, "write_connection_details");
-	getline(inf, tmp_username);
-	while(!inf.eof() ){
-		pName = PyUnicode_DecodeFSDefault(tmp_username);
-		row.addElement(std::make_shared<TextComponent>(window, tmp_username, Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
-		row.makeAcceptInputHandler([window] {
-			window->pushGui(new GuiMsgBox(window, "CONNECT TO FRIEND?", "YES",
-				[] {
-				Scripting::fireEvent("connect");
-				pValue = PyObject_CallObject(pFunc, pName);
-			}, "NO", nullptr));
-		});
-		s->addRow(row);
+	if (pModule != null){
+		pFunc = PyObject_GetAttrString(pModule, "write_connection_details");
 		getline(inf, tmp_username);
+		while(!inf.eof() ){
+			pName = PyUnicode_DecodeFSDefault(tmp_username);
+			row.addElement(std::make_shared<TextComponent>(window, tmp_username, Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+			row.makeAcceptInputHandler([window] {
+				window->pushGui(new GuiMsgBox(window, "CONNECT TO FRIEND?", "YES",
+					[] {
+					Scripting::fireEvent("connect");
+					pValue = PyObject_CallObject(pFunc, pName);
+				}, "NO", nullptr));
+			});
+			s->addRow(row);
+			getline(inf, tmp_username);
+		}
+		Py_DECREF(pName);
+		Py_DECREF(pFile);
+		Py_DECREF(pModule);	
+		Py_DECREF(pValue);
+		Py_DECREF(pFunc);
 	}
-	Py_DECREF(pName);
-	Py_DECREF(pFile);
-	Py_DECREF(pModule);
-	Py_DECREF(pValue);
-	Py_DECREF(pFunc);
+	else {
+		Py_DECREF(pName);
+		Py_DECREF(pFile);
+		Py_DECREF(pModule);	
+		Py_DECREF(pValue);
+		Py_DECREF(pFunc);
+	}
 	//add row to Update friends
 	row.addElement(std::make_shared<TextComponent>(window, "UPDATE FRIENDS LIST", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 	row.makeAcceptInputHandler([window] {
