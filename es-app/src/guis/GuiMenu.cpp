@@ -473,9 +473,9 @@ void GuiMenu::openConfigInput()
 void GuiMenu::openFriendsList(){
 	auto s = new GuiSettings(mWindow, "FRIENDS LIST");
 	//Variables
-	ifstream inf;
+	std::ifstream inf;
 	inf.open("userbase.txt");
-	string tmp_username;
+	std::string tmp_username;
 	Window* window = mWindow;
 	ComponentListRow row;
 	PyObject *pName;
