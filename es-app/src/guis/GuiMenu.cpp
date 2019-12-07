@@ -18,7 +18,10 @@
 #include "VolumeControl.h"
 #include <SDL_events.h>
 #include <algorithm>
+#include <fstream>
 #include "platform.h"
+#include "userbase.txt"
+#include <Python.h>
 
 GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MENU"), mVersion(window)
 {
@@ -41,6 +44,9 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, "MAIN MEN
 
 	if (isFullUI)
 		addEntry("CONFIGURE INPUT", 0x777777FF, true, [this] { openConfigInput(); });
+
+	if (isFullUI)
+		addEntry("FRIENDS LIST", 0x777777FF, true, [this] {openFriendsList(); });
 
 	addEntry("QUIT", 0x777777FF, true, [this] {openQuitMenu(); });
 
@@ -462,6 +468,82 @@ void GuiMenu::openConfigInput()
 	}, "NO", nullptr)
 	);
 
+}
+
+void GuiMenu::openFriendsList(){
+	auto s = new GuiSettings(mWindow, "FRIENDS LIST");
+	//Variables
+	std::ifstream inf;
+	inf.open("userbase.txt");
+	std::string tmp_username;
+	Window* window = mWindow;
+	ComponentListRow row;
+	PyObject *pName;
+	PyObject *pFile;
+	PyObject *pFunc;
+	PyObject *pModule, *pValue;
+	//Python Setup
+	Py_Initialize();
+	//Add new friend
+	/*
+	row.addElement(std::make_shared<TextComponent>(window, "ADD FRIENDS", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	row.makeAcceptInputHandler([window]) {
+		window->pushGui(new GuiMsgBox(window, "ENTER FRIENDS NAME"));
+	}
+	s->addRow(row);
+	*/
+	/*row.addElement(std::make_shared<TextComponent>(window, "BeastBalla", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	s->addRow(row);
+	row.addElement(std::make_shared<TextComponent>(window, "EconomicRug", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	s->addRow(row);*/
+	//add row for each friend
+	pFile = PyUnicode_DecodeFSDefault("ConnectToUser");
+	pModule = PyImport_Import(pFile);
+	if (pModule != null){
+		pFunc = PyObject_GetAttrString(pModule, "write_connection_details");
+		getline(inf, tmp_username);
+		while(!inf.eof() ){
+			pName = PyUnicode_DecodeFSDefault(tmp_username);
+			row.addElement(std::make_shared<TextComponent>(window, tmp_username, Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+			row.makeAcceptInputHandler([window] {
+				window->pushGui(new GuiMsgBox(window, "CONNECT TO FRIEND?", "YES",
+					[] {
+					Scripting::fireEvent("connect");
+					pValue = PyObject_CallObject(pFunc, pName);
+				}, "NO", nullptr));
+			});
+			s->addRow(row);
+			getline(inf, tmp_username);
+		}
+		Py_DECREF(pName);
+		Py_DECREF(pFile);
+		Py_DECREF(pModule);	
+		Py_DECREF(pValue);
+		Py_DECREF(pFunc);
+	}
+	else {
+		Py_DECREF(pName);
+		Py_DECREF(pFile);
+		Py_DECREF(pModule);	
+		Py_DECREF(pValue);
+		Py_DECREF(pFunc);
+	}
+	//add row to Update friends
+	row.addElement(std::make_shared<TextComponent>(window, "UPDATE FRIENDS LIST", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	row.makeAcceptInputHandler([window] {
+		window->pushGui(new GuiMsgBox(window, "FRIENDS LIST UPDATED", 
+			[] {
+				Scripting::fireEvent("updated");
+			}));
+	});
+	s->addRow(row);
+	//add row to update Connection
+	row.addElement(std::make_shared<TextComponent>(window, "UPDATE MY CONNECTION DETAILS", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	s->addRow(row);
+	//Push GUI to window
+	mWindow.pushGui(s);
+	//close filestream
+	inf.close();
 }
 
 void GuiMenu::openQuitMenu()
